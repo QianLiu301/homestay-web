@@ -8,6 +8,8 @@ const app = cloudbase.init({
 // auth 对象只创建一次
 const auth = app.auth({ persistence: 'local' })
 
+const IS_DEV = import.meta.env.DEV
+
 // 登录 Promise 缓存
 let authPromise = null
 
@@ -17,12 +19,9 @@ const ensureAuth = async () => {
     // 检查当前登录状态
     const loginState = await auth.getLoginState()
     
-    console.log('========== 登录状态检查 ==========')
-    console.log('loginState:', loginState)
     
     if (loginState) {
       console.log('✅ 已登录')
-      console.log('用户信息:', loginState.user)
       console.log('是否匿名:', loginState.isAnonymousAuth)
       console.log('登录类型:', loginState.loginType)
       return loginState
@@ -35,11 +34,9 @@ const ensureAuth = async () => {
       authPromise = auth.signInAnonymously()
         .then(async (res) => {
           console.log('✅ 匿名登录成功')
-          console.log('登录返回:', res)
           
           // 重新获取登录状态确认
           const newState = await auth.getLoginState()
-          console.log('登录后状态:', newState)
           console.log('用户 UID:', newState?.user?.uid)
           
           return newState
@@ -209,12 +206,12 @@ export const getHomestays = async () => {
     
     // 先确保登录
     const loginState = await ensureAuth()
-    console.log('当前登录状态:', loginState)
-    
+  
     if (!loginState) {
       console.error('❌ 登录失败，无法获取房源')
       return []
     }
+    if (IS_DEV) console.log('[AUTH] logged in')
     
     const db = await getDb()
     console.log('数据库实例获取成功')
@@ -370,7 +367,7 @@ export const testLogin = async () => {
 }
 
 // 挂载到 window 供控制台调用
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && IS_DEV) {
   window.checkAuthStatus = checkAuthStatus
   window.testLogin = testLogin
 }
