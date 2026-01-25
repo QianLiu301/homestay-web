@@ -70,6 +70,10 @@ function Detail() {
     if (homestay.videoUrl) num++
     numbers.images = num
     if (homestay.images?.length > 0) num++
+    numbers.interiorVideo = num
+    if (homestay.interiorVideoUrl) num++
+    numbers.interiorImages = num
+    if (homestay.interiorImages?.length > 0) num++
     numbers.textGuide = num
     if (homestay.textGuide) num++
     numbers.transport = num
@@ -260,6 +264,37 @@ function Detail() {
             <div className="section-title">{lang === 'zh' ? '图片指引' : 'Photo Guide'}</div>
             <div className="images-grid">
               {homestay.images.map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  alt=""
+                  className="guide-image"
+                  onClick={() => window.open(img, '_blank')}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 房源内部视频 */}
+        {homestay.interiorVideoUrl && (
+          <div className="section-card">
+            <div className="section-number">{sn.interiorVideo}</div>
+            <div className="section-title">{lang === 'zh' ? '房源内部视频' : 'Interior Video'}</div>
+            <div className="video-wrap">
+              <video src={homestay.interiorVideoUrl} controls className="guide-video"></video>
+            </div>
+            <div className="video-tip">{lang === 'zh' ? '点击播放查看房源内部视频' : 'Tap to play interior video'}</div>
+          </div>
+        )}
+
+        {/* 房源内部图片 */}
+        {homestay.interiorImages?.length > 0 && (
+          <div className="section-card">
+            <div className="section-number">{sn.interiorImages}</div>
+            <div className="section-title">{lang === 'zh' ? '房源内部图片' : 'Interior Photos'}</div>
+            <div className="images-grid">
+              {homestay.interiorImages.map((img, i) => (
                 <img
                   key={i}
                   src={img}

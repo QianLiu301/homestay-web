@@ -239,7 +239,7 @@ function App() {
                 <span className="homestay-name">
                   {lang === 'en' && item.nameEn ? item.nameEn : item.name}
                 </span>
-                {isAdmin && (
+                {false && (
                   <div className="card-actions">
                     <button
                       className="action-btn delete-btn"

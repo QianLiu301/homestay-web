@@ -287,6 +287,15 @@ export const processHomestayFiles = async (homestay) => {
       if (img && img.startsWith('cloud://')) fileIds.push(img)
     })
   }
+
+  if (homestay.interiorVideoUrl && homestay.interiorVideoUrl.startsWith('cloud://')) {
+    fileIds.push(homestay.interiorVideoUrl)
+  }
+  if (homestay.interiorImages && homestay.interiorImages.length > 0) {
+    homestay.interiorImages.forEach(img => {
+      if (img && img.startsWith('cloud://')) fileIds.push(img)
+    })
+  }
   
   if (fileIds.length === 0) return homestay
   
@@ -297,6 +306,13 @@ export const processHomestayFiles = async (homestay) => {
   }
   if (homestay.images) {
     homestay.images = homestay.images.map(img => urlMap[img] || img)
+  }
+
+  if (homestay.interiorVideoUrl && urlMap[homestay.interiorVideoUrl]) {
+    homestay.interiorVideoUrl = urlMap[homestay.interiorVideoUrl]
+  }
+  if (homestay.interiorImages) {
+    homestay.interiorImages = homestay.interiorImages.map(img => urlMap[img] || img)
   }
   
   return homestay
