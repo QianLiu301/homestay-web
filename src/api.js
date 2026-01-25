@@ -9,39 +9,30 @@ const app = cloudbase.init({
 const auth = app.auth({ persistence: 'local' })
 
 const IS_DEV = import.meta.env.DEV
+const log = (...args) => { if (IS_DEV) console.log(...args) }
 
 // 登录 Promise 缓存
 let authPromise = null
 
-// 确保已登录
+// 确保已登录（匿名登录）
 const ensureAuth = async () => {
   try {
-    // 检查当前登录状态
     const loginState = await auth.getLoginState()
-    
-    
     if (loginState) {
-      console.log('✅ 已登录')
-      console.log('是否匿名:', loginState.isAnonymousAuth)
-      console.log('登录类型:', loginState.loginType)
+      log('✅ 已登录')
       return loginState
     }
-    
-    // 需要登录
-    console.log('❌ 未登录，开始匿名登录...')
-    
+
+    log('❌ 未登录，开始匿名登录...')
+
     if (!authPromise) {
       authPromise = auth.signInAnonymously()
-        .then(async (res) => {
-          console.log('✅ 匿名登录成功')
-          
-          // 重新获取登录状态确认
-          const newState = await auth.getLoginState()
-          console.log('用户 UID:', newState?.user?.uid)
-          
+        .then(() => auth.getLoginState())
+        .then((newState) => {
+          log('✅ 匿名登录成功')
           return newState
         })
-        .catch(err => {
+        .catch((err) => {
           console.error('❌ 匿名登录失败:', err)
           console.error('错误码:', err.code)
           console.error('错误信息:', err.message)
@@ -49,13 +40,14 @@ const ensureAuth = async () => {
           throw err
         })
     }
-    
+
     return authPromise
   } catch (err) {
     console.error('ensureAuth 异常:', err)
     throw err
   }
 }
+
 
 // 获取数据库引用
 const getDb = async () => {
@@ -199,46 +191,33 @@ export const getHomestay = async (id) => {
   return homestay
 }
 
-// 获取房源列表
 export const getHomestays = async () => {
   try {
-    console.log('===== 开始获取房源列表 =====')
-    
-    // 先确保登录
-    const loginState = await ensureAuth()
-  
-    if (!loginState) {
-      console.error('❌ 登录失败，无法获取房源')
-      return []
-    }
-    if (IS_DEV) console.log('[AUTH] logged in')
-    
+    log('===== 开始获取房源列表 =====')
+
     const db = await getDb()
-    console.log('数据库实例获取成功')
-    
-    // 查询数据
+
     let allData = []
-const batchSize = 100
-let offset = 0
+    const batchSize = 100
+    let offset = 0
 
-while (true) {
-  const res = await db.collection('homestays')
-    .orderBy('updateTime', 'desc')
-    .skip(offset)
-    .limit(batchSize)
-    .get()
-  
-  if (!res.data || res.data.length === 0) break
-  
-  allData = allData.concat(res.data)
-  offset += res.data.length
-  
-  if (res.data.length < batchSize) break
-}
+    while (true) {
+      const res = await db.collection('homestays')
+        .orderBy('updateTime', 'desc')
+        .skip(offset)
+        .limit(batchSize)
+        .get()
 
-console.log('✅ 获取到', allData.length, '条房源')
-return allData
-    
+      if (!res.data || res.data.length === 0) break
+
+      allData = allData.concat(res.data)
+      offset += res.data.length
+
+      if (res.data.length < batchSize) break
+    }
+
+    log('✅ 获取到', allData.length, '条房源')
+    return allData
   } catch (err) {
     console.error('❌ 获取房源失败:', err)
     console.error('错误码:', err.code)
@@ -246,6 +225,7 @@ return allData
     return []
   }
 }
+
 
 // 删除房源
 export const deleteHomestay = async (id) => {
@@ -320,61 +300,43 @@ export const processHomestayFiles = async (homestay) => {
 
 // ===== 导出调试函数 =====
 export const checkAuthStatus = async () => {
-  console.log('===== 检查认证状态 =====')
-  
+  log('===== 检查认证状态 =====')
   try {
     const loginState = await auth.getLoginState()
-    
     if (loginState) {
-      console.log('✅ 已登录')
-      console.log('用户 UID:', loginState.user?.uid)
-      console.log('是否匿名:', loginState.isAnonymousAuth)
-      console.log('登录类型:', loginState.loginType)
-      console.log('完整状态:', loginState)
+      log('✅ 已登录')
       return true
-    } else {
-      console.log('❌ 未登录')
-      return false
     }
+    log('❌ 未登录')
+    return false
   } catch (err) {
     console.error('检查登录状态失败:', err)
     return false
   }
 }
 
+
 // 手动触发登录测试
 export const testLogin = async () => {
-  console.log('===== 手动测试登录 =====')
-  
+  log('===== 手动测试登录 =====')
   try {
-    // 先检查当前状态
     let state = await auth.getLoginState()
-    console.log('当前状态:', state)
-    
+    log('当前状态:', state)
+
     if (!state) {
-      console.log('尝试匿名登录...')
-      const result = await auth.signInAnonymously()
-      console.log('登录结果:', result)
-      
-      // 再次检查
+      log('尝试匿名登录...')
+      await auth.signInAnonymously()
       state = await auth.getLoginState()
-      console.log('登录后状态:', state)
+      log('登录后状态:', state)
     }
-    
-    // 测试数据库访问
+
     if (state) {
-      console.log('测试数据库访问...')
+      log('测试数据库访问...')
       const db = app.database()
       const res = await db.collection('homestays').limit(1).get()
-      console.log('数据库测试结果:', res)
-      
-      if (res.data && res.data.length > 0) {
-        console.log('✅ 数据库访问成功！')
-      } else {
-        console.log('⚠️ 数据库访问成功但无数据')
-      }
+      log('数据库测试结果:', res)
     }
-    
+
     return state
   } catch (err) {
     console.error('测试失败:', err)
@@ -382,8 +344,10 @@ export const testLogin = async () => {
   }
 }
 
+
 // 挂载到 window 供控制台调用
 if (typeof window !== 'undefined' && IS_DEV) {
   window.checkAuthStatus = checkAuthStatus
   window.testLogin = testLogin
 }
+
