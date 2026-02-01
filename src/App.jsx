@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getHomestays, deleteHomestay, verifyPassword, verifyAdminPassword } from './api'
+import { getHomestays, deleteHomestay, verifyPassword, verifyAdminPassword, ACCESS_PASSWORD_HASH, ADMIN_PASSWORD_HASH } from './api'
+
+const AUTH_EXPIRY_MS = 24 * 60 * 60 * 1000 // 24小时
 
 function App() {
   const navigate = useNavigate()
@@ -26,12 +28,18 @@ function App() {
     // 本地验证密码
     if (verifyPassword(passwordInput)) {
       setIsUnlocked(true)
-      sessionStorage.setItem('unlocked', 'true')
-      
+      localStorage.setItem('auth', JSON.stringify({
+        hash: ACCESS_PASSWORD_HASH,
+        time: Date.now()
+      }))
+
       // 检查是否是管理员密码
       if (verifyAdminPassword(passwordInput)) {
         setIsAdmin(true)
-        sessionStorage.setItem('admin', 'true')
+        localStorage.setItem('admin', JSON.stringify({
+          hash: ADMIN_PASSWORD_HASH,
+          time: Date.now()
+        }))
       }
       
       // 加载数据
@@ -54,15 +62,27 @@ function App() {
     setLoading(false)
   }
 
-  // 检查会话状态
+  // 检查本地登录状态（24小时有效期）
   useEffect(() => {
-    const unlocked = sessionStorage.getItem('unlocked')
-    const admin = sessionStorage.getItem('admin')
-    
-    if (unlocked) {
-      setIsUnlocked(true)
-      if (admin) setIsAdmin(true)
-      loadData()
+    try {
+      const authData = JSON.parse(localStorage.getItem('auth'))
+      if (authData && authData.hash === ACCESS_PASSWORD_HASH && (Date.now() - authData.time) < AUTH_EXPIRY_MS) {
+        setIsUnlocked(true)
+
+        const adminData = JSON.parse(localStorage.getItem('admin'))
+        if (adminData && adminData.hash === ADMIN_PASSWORD_HASH && (Date.now() - adminData.time) < AUTH_EXPIRY_MS) {
+          setIsAdmin(true)
+        }
+
+        loadData()
+      } else {
+        // 过期或哈希不匹配，清除
+        localStorage.removeItem('auth')
+        localStorage.removeItem('admin')
+      }
+    } catch {
+      localStorage.removeItem('auth')
+      localStorage.removeItem('admin')
     }
   }, [])
 
@@ -103,13 +123,16 @@ function App() {
   const toggleAdmin = () => {
     if (isAdmin) {
       setIsAdmin(false)
-      sessionStorage.removeItem('admin')
+      localStorage.removeItem('admin')
       showToast(lang === 'zh' ? '已退出管理' : 'Admin mode off')
     } else {
       const pwd = window.prompt(lang === 'zh' ? '请输入管理员密码' : 'Enter admin password')
       if (pwd && verifyAdminPassword(pwd)) {
         setIsAdmin(true)
-        sessionStorage.setItem('admin', 'true')
+        localStorage.setItem('admin', JSON.stringify({
+          hash: ADMIN_PASSWORD_HASH,
+          time: Date.now()
+        }))
         showToast(lang === 'zh' ? '管理模式已开启' : 'Admin mode on')
       } else if (pwd) {
         showToast(lang === 'zh' ? '密码错误' : 'Wrong password')
