@@ -8,6 +8,7 @@ function Detail() {
   const [loading, setLoading] = useState(true)
   const [lang, setLang] = useState('zh')
   const [toast, setToast] = useState('')
+  const [mapModal, setMapModal] = useState(null) // { lat, lng, name }
 
   // 显示提示
   const showToast = (msg) => {
@@ -21,11 +22,32 @@ function Detail() {
     showToast(lang === 'zh' ? '已复制' : 'Copied')
   }
 
-  // 打开导航
+  // 打开地图选择弹窗
   const openNavigation = (lat, lng, name) => {
-    // 尝试打开高德地图
-    const url = `https://uri.amap.com/marker?position=${lng},${lat}&name=${encodeURIComponent(name)}`
-    window.open(url, '_blank')
+    setMapModal({ lat, lng, name })
+  }
+
+  // 用指定地图打开导航
+  const openWithMap = (provider) => {
+    if (!mapModal) return
+    const { lat, lng, name } = mapModal
+    const encodedName = encodeURIComponent(name)
+    let url = ''
+    switch (provider) {
+      case 'amap':
+        url = `https://uri.amap.com/marker?position=${lng},${lat}&name=${encodedName}`
+        break
+      case 'google':
+        url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+        break
+      case 'tencent':
+        url = `https://apis.map.qq.com/uri/v1/marker?marker=coord:${lat},${lng};title:${encodedName}&referer=homestay`
+        break
+      default:
+        break
+    }
+    if (url) window.open(url, '_blank')
+    setMapModal(null)
   }
 
   // 拨打电话
@@ -415,6 +437,27 @@ function Detail() {
           </button>
         </div>
       </div>
+
+      {/* 地图选择弹窗 */}
+      {mapModal && (
+        <div className="map-modal-overlay" onClick={() => setMapModal(null)}>
+          <div className="map-modal" onClick={e => e.stopPropagation()}>
+            <div className="map-modal-title">{lang === 'zh' ? '选择地图' : 'Choose Map'}</div>
+            <button className="map-option amap" onClick={() => openWithMap('amap')}>
+              {lang === 'zh' ? '高德地图' : 'Amap'}
+            </button>
+            <button className="map-option google" onClick={() => openWithMap('google')}>
+              {lang === 'zh' ? '谷歌地图' : 'Google Maps'}
+            </button>
+            <button className="map-option tencent" onClick={() => openWithMap('tencent')}>
+              {lang === 'zh' ? '腾讯地图' : 'Tencent Maps'}
+            </button>
+            <button className="map-option cancel" onClick={() => setMapModal(null)}>
+              {lang === 'zh' ? '取消' : 'Cancel'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {toast && <div className="toast">{toast}</div>}
     </div>
