@@ -720,3 +720,30 @@ body {
   color: #666;
   margin-top: 4px;
 }
+
+/* 房间设施 */
+.facilities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.facility-item {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 12px 15px;
+}
+
+.facility-label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+  font-size: 15px;
+}
+
+.facility-content {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}

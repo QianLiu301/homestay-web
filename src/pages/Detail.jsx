@@ -104,6 +104,12 @@ function Detail() {
     if (homestay.parkingLatitude || homestay.parkingInfo) num++
     numbers.notes = num
     if (homestay.notes) num++
+    numbers.facilities = num
+    const hasFacilities = homestay.kitchenInfo || homestay.washerInfo || homestay.acInfo || 
+      homestay.heatingInfo || homestay.mediaInfo || homestay.routerInfo || 
+      homestay.waterHeaterInfo || homestay.waterValveInfo || homestay.gasValveInfo || 
+      homestay.electricBoxInfo
+    if (hasFacilities) num++
     numbers.contact = num
     
     return numbers
@@ -380,6 +386,99 @@ function Detail() {
             <div className="section-title">{lang === 'zh' ? '温馨提示' : 'Notes'}</div>
             <div className="notes-content">
               {lang === 'en' && homestay.notesEn ? homestay.notesEn : homestay.notes}
+            </div>
+          </div>
+        )}
+
+        {/* 房间设施 */}
+        {(homestay.kitchenInfo || homestay.washerInfo || homestay.acInfo || 
+          homestay.heatingInfo || homestay.mediaInfo || homestay.routerInfo || 
+          homestay.waterHeaterInfo || homestay.waterValveInfo || homestay.gasValveInfo || 
+          homestay.electricBoxInfo) && (
+          <div className="section-card">
+            <div className="section-number">{sn.facilities}</div>
+            <div className="section-title">{lang === 'zh' ? '房间设施' : 'Room Facilities'}</div>
+            <div className="facilities-list">
+              {homestay.kitchenInfo && (
+                <div className="facility-item">
+                  <div className="facility-label">🍳 {lang === 'zh' ? '厨房' : 'Kitchen'}</div>
+                  <div className="facility-content">
+                    {lang === 'en' && homestay.kitchenInfoEn ? homestay.kitchenInfoEn : homestay.kitchenInfo}
+                  </div>
+                </div>
+              )}
+              {homestay.washerInfo && (
+                <div className="facility-item">
+                  <div className="facility-label">🧺 {lang === 'zh' ? '洗衣机' : 'Washer'}</div>
+                  <div className="facility-content">
+                    {lang === 'en' && homestay.washerInfoEn ? homestay.washerInfoEn : homestay.washerInfo}
+                  </div>
+                </div>
+              )}
+              {homestay.acInfo && (
+                <div className="facility-item">
+                  <div className="facility-label">❄️ {lang === 'zh' ? '空调' : 'Air Conditioner'}</div>
+                  <div className="facility-content">
+                    {lang === 'en' && homestay.acInfoEn ? homestay.acInfoEn : homestay.acInfo}
+                  </div>
+                </div>
+              )}
+              {homestay.heatingInfo && (
+                <div className="facility-item">
+                  <div className="facility-label">🔥 {lang === 'zh' ? '地暖' : 'Floor Heating'}</div>
+                  <div className="facility-content">
+                    {lang === 'en' && homestay.heatingInfoEn ? homestay.heatingInfoEn : homestay.heatingInfo}
+                  </div>
+                </div>
+              )}
+              {homestay.mediaInfo && (
+                <div className="facility-item">
+                  <div className="facility-label">📺 {lang === 'zh' ? '媒体娱乐' : 'Entertainment'}</div>
+                  <div className="facility-content">
+                    {lang === 'en' && homestay.mediaInfoEn ? homestay.mediaInfoEn : homestay.mediaInfo}
+                  </div>
+                </div>
+              )}
+              {homestay.routerInfo && (
+                <div className="facility-item">
+                  <div className="facility-label">📶 {lang === 'zh' ? '路由器' : 'Router'}</div>
+                  <div className="facility-content">
+                    {lang === 'en' && homestay.routerInfoEn ? homestay.routerInfoEn : homestay.routerInfo}
+                  </div>
+                </div>
+              )}
+              {homestay.waterHeaterInfo && (
+                <div className="facility-item">
+                  <div className="facility-label">🚿 {lang === 'zh' ? '热水器' : 'Water Heater'}</div>
+                  <div className="facility-content">
+                    {lang === 'en' && homestay.waterHeaterInfoEn ? homestay.waterHeaterInfoEn : homestay.waterHeaterInfo}
+                  </div>
+                </div>
+              )}
+              {homestay.waterValveInfo && (
+                <div className="facility-item">
+                  <div className="facility-label">🚰 {lang === 'zh' ? '水阀' : 'Water Valve'}</div>
+                  <div className="facility-content">
+                    {lang === 'en' && homestay.waterValveInfoEn ? homestay.waterValveInfoEn : homestay.waterValveInfo}
+                  </div>
+                </div>
+              )}
+              {homestay.gasValveInfo && (
+                <div className="facility-item">
+                  <div className="facility-label">🔥 {lang === 'zh' ? '煤气阀' : 'Gas Valve'}</div>
+                  <div className="facility-content">
+                    {lang === 'en' && homestay.gasValveInfoEn ? homestay.gasValveInfoEn : homestay.gasValveInfo}
+                  </div>
+                </div>
+              )}
+              {homestay.electricBoxInfo && (
+                <div className="facility-item">
+                  <div className="facility-label">⚡ {lang === 'zh' ? '电箱' : 'Electric Panel'}</div>
+                  <div className="facility-content">
+                    {lang === 'en' && homestay.electricBoxInfoEn ? homestay.electricBoxInfoEn : homestay.electricBoxInfo}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
