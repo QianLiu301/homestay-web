@@ -165,8 +165,8 @@ const md5 = (string) => {
 }
 
 // 密码哈希
-const ACCESS_PASSWORD_HASH = 'd219547afd02b95dfd92132808836b68'
-const ADMIN_PASSWORD_HASH = 'd219547afd02b95dfd92132808836b68'
+export const ACCESS_PASSWORD_HASH = 'd219547afd02b95dfd92132808836b68'
+export const ADMIN_PASSWORD_HASH = 'd219547afd02b95dfd92132808836b68'
 
 export const verifyPassword = (password) => {
   const hash = md5(password)
